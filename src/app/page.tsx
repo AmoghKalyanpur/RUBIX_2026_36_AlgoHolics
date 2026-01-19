@@ -31,10 +31,10 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
-                  <div className="text-6xl font-bold tracking-tight sm:text-7xl lg:text-8xl">
+                  <div className="text-6xl font-bold tracking-tight sm:text-7xl lg:text-8xl mb-4">
                     <span className="text-primary">F</span>in<span className="text-primary">S</span>ight
                   </div>
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline">
+                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-4xl/none font-headline">
                     Modern Financial Analysis at Your Fingertips
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
@@ -56,12 +56,12 @@ export default function Home() {
                     <div className="absolute top-0 -right-4 w-72 h-72 bg-primary/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
                     <div className="absolute -bottom-8 left-20 w-72 h-72 bg-secondary rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
                     <div className="relative">
-                        <Card>
+                        {/* <Card>
                             <CardContent className="p-6">
                                 <h3 className="text-lg font-bold mb-2">FinSight</h3>
                                 <p className="text-muted-foreground">Unlock your financial potential.</p>
                             </CardContent>
-                        </Card>
+                        </Card> */}
                     </div>
                 </div>
               </div>
