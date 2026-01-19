@@ -73,9 +73,6 @@ export function SidebarNav({ children }: { children: React.ReactNode }) {
         <header className="flex h-14 items-center justify-between border-b bg-background px-4">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="md:hidden" />
-            <h1 className="text-lg font-semibold tracking-tight">
-              {navItems.find((item) => pathname.startsWith(item.href))?.label}
-            </h1>
           </div>
         </header>
         <main className="flex-1 overflow-auto p-4 md:p-6">

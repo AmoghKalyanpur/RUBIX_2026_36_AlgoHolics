@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, IndianRupeeIcon, Search, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Building, Percent, Loader2 } from "lucide-react";
+import { DollarSign, IndianRupeeIcon, Search, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Building, Percent, Loader2, Gauge, Bell, Sparkles } from "lucide-react";
 import { useState, useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { dummyData } from "@/lib/dummy-data";
@@ -24,7 +24,7 @@ const initialDescription = "Select a stock ticker from the search bar to view it
 export default function AnalysisPage() {
   const [ticker, setTicker] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [overviewData, setOverviewData] = useState(getInitialOverviewData());
   const [historicalData, setHistoricalData] = useState([]);
   const [companyDescription, setCompanyDescription] = useState(initialDescription);
@@ -156,11 +156,50 @@ export default function AnalysisPage() {
         <TabsContent value="trend" className="mt-4">
             <Card>
                 <CardHeader>
-                    <CardTitle>Trend Analysis</CardTitle>
-                    <CardDescription>This space is reserved for future analysis tools.</CardDescription>
+                    <CardTitle>AI-Powered Trend Analysis</CardTitle>
+                    <CardDescription>Real-time technical analysis powered by a machine learning backend.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex items-center justify-center h-96">
-                    <p>Coming soon.</p>
+                <CardContent className="space-y-6 py-6">
+                    <div className="grid gap-6 sm:grid-cols-3">
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Trend Prediction</CardTitle>
+                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">--</div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Confidence</CardTitle>
+                                <Gauge className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">--</div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Signal</CardTitle>
+                                <Bell className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">--</div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                                <Sparkles className="h-5 w-5 text-primary" />
+                                AI Insight
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground">--</p>
+                        </CardContent>
+                    </Card>
                 </CardContent>
             </Card>
         </TabsContent>
