@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  BarChart2,
+  LineChart,
   Bot,
   Newspaper,
   PanelLeft,
@@ -24,7 +24,7 @@ import {
 import { Button } from "../ui/button";
 
 const navItems = [
-  { href: "/dashboard/analysis", icon: BarChart2, label: "Analysis" },
+  { href: "/dashboard/analysis", icon: LineChart, label: "Analysis" },
   { href: "/dashboard/live-news", icon: Newspaper, label: "Live News" },
   { href: "/dashboard/finbot", icon: Bot, label: "FinBot" },
 ];
@@ -40,9 +40,9 @@ export function SidebarNav({ children }: { children: React.ReactNode }) {
             href="/dashboard/analysis"
             className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center"
           >
-            <BarChart2 className="size-6 shrink-0" />
-            <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
-              FinSight
+            <LineChart className="size-6 shrink-0" />
+            <span className="font-bold text-lg group-data-[collapsible=icon]:hidden">
+              <span className="text-sidebar-ring">F</span>in<span className="text-sidebar-ring">S</span>ight
             </span>
           </Link>
         </SidebarHeader>

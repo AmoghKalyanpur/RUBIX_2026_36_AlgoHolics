@@ -9,9 +9,9 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link href="#" className="flex items-center justify-center" prefetch={false}>
+        <Link href="/" className="flex items-center justify-center gap-2" prefetch={false}>
           <LineChart className="h-6 w-6 text-primary" />
-          <span className="font-bold ml-2 text-lg"><span className="text-primary">F</span>in<span className="text-primary">S</span>ight</span>
+          <span className="font-bold text-lg"><span className="text-primary">F</span>in<span className="text-primary">S</span>ight</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link href="#features" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
