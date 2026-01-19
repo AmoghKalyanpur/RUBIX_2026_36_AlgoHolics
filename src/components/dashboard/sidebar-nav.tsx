@@ -1,10 +1,12 @@
-"use client";
+'use client';
 
 import {
   LineChart,
   Bot,
   Newspaper,
-  PanelLeft,
+  FileText,
+  Bell,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,12 +23,17 @@ import {
   SidebarTrigger,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Button } from "../ui/button";
 
-const navItems = [
+const mainNavItems = [
   { href: "/dashboard/analysis", icon: LineChart, label: "Analysis" },
   { href: "/dashboard/live-news", icon: Newspaper, label: "Live News" },
   { href: "/dashboard/finbot", icon: Bot, label: "FinBot" },
+  { href: "/dashboard/analysis", icon: FileText, label: "Generate Reports" },
+];
+
+const footerNavItems = [
+  { href: "/dashboard/analysis", icon: Bell, label: "Notifications" },
+  { href: "/dashboard/analysis", icon: Settings, label: "Settings" },
 ];
 
 export function SidebarNav({ children }: { children: React.ReactNode }) {
@@ -46,13 +53,13 @@ export function SidebarNav({ children }: { children: React.ReactNode }) {
             </span>
           </Link>
         </SidebarHeader>
-        <SidebarContent className="p-2">
+        <SidebarContent className="p-2 flex flex-col justify-between">
           <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
+            {mainNavItems.map((item) => (
+              <SidebarMenuItem key={item.href + item.label}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname.startsWith(item.href)}
+                  isActive={pathname.startsWith(item.href) && item.label !== 'Generate Reports'}
                   tooltip={item.label}
                   className="justify-start"
                 >
@@ -66,7 +73,22 @@ export function SidebarNav({ children }: { children: React.ReactNode }) {
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="p-2">
-          {/* Footer content can go here */}
+          <SidebarMenu>
+              {footerNavItems.map((item) => (
+              <SidebarMenuItem key={item.label}>
+                  <SidebarMenuButton
+                  asChild
+                  tooltip={item.label}
+                  className="justify-start"
+                  >
+                  <Link href={item.href}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                  </Link>
+                  </SidebarMenuButton>
+              </SidebarMenuItem>
+              ))}
+          </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
