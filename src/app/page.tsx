@@ -10,8 +10,8 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center">
         <Link href="/" className="flex items-center justify-center gap-2" prefetch={false}>
-          <LineChart className="h-6 w-6 text-primary" />
-          <span className="font-bold text-lg"><span className="text-primary">F</span>in<span className="text-primary">S</span>ight</span>
+          <LineChart className="h-8 w-8 text-primary" />
+          <span className="font-bold text-xl"><span className="text-primary">F</span>in<span className="text-primary">S</span>ight</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link href="#features" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>

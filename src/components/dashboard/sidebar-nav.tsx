@@ -37,7 +37,7 @@ export function SidebarNav({ children }: { children: React.ReactNode }) {
       <Sidebar side="left" variant="sidebar" collapsible="icon">
         <SidebarHeader className="h-14 items-center justify-center p-2 text-primary-foreground group-data-[collapsible=icon]:h-10">
           <Link
-            href="/dashboard/analysis"
+            href="/"
             className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center"
           >
             <LineChart className="size-6 shrink-0" />
