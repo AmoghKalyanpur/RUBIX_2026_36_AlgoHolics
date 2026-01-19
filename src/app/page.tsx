@@ -11,7 +11,7 @@ export default function Home() {
       <header className="px-4 lg:px-6 h-14 flex items-center">
         <Link href="#" className="flex items-center justify-center" prefetch={false}>
           <LineChart className="h-6 w-6 text-primary" />
-          <span className="sr-only">FinSight</span>
+          <span className="font-bold ml-2 text-lg"><span className="text-primary">F</span>in<span className="text-primary">S</span>ight</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link href="#features" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
@@ -31,6 +31,9 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
+                  <div className="text-3xl font-bold tracking-tight sm:text-4xl">
+                    <span className="text-primary">F</span>in<span className="text-primary">S</span>ight
+                  </div>
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline">
                     Modern Financial Analysis at Your Fingertips
                   </h1>
