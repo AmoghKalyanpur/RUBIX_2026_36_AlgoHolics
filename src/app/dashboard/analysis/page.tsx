@@ -9,6 +9,7 @@ import { DollarSign, IndianRupeeIcon, Search, TrendingUp, TrendingDown, ArrowUp,
 import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { dummyData } from "@/lib/dummy-data";
+import { BacktestSimulator } from "@/components/dashboard/analysis/backtest-simulator";
 
 const getInitialOverviewData = () => ([
     { title: "Current Price", value: "-", icon: IndianRupeeIcon, description: "The most recent trading price of the stock." },
@@ -216,15 +217,7 @@ export default function AnalysisPage() {
         </TabsContent>
 
         <TabsContent value="backtest" className="mt-6">
-            <Card className="bg-card/80 backdrop-blur-sm">
-                <CardHeader>
-                    <CardTitle className="text-xl">Backtest Simulator</CardTitle>
-                    <CardDescription className="pt-2">Simulate trading strategies based on historical data.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center h-96 text-muted-foreground">
-                    <p>Backtesting feature coming soon.</p>
-                </CardContent>
-            </Card>
+            <BacktestSimulator />
         </TabsContent>
       </Tabs>
     </div>
