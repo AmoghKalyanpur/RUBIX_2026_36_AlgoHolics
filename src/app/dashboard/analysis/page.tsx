@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DollarSign, IndianRupeeIcon, Search, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Building, Percent, Loader2, Gauge, Bell, Sparkles } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { dummyData } from "@/lib/dummy-data";
 
@@ -25,9 +25,12 @@ export default function AnalysisPage() {
   const [ticker, setTicker] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Data States
   const [overviewData, setOverviewData] = useState(getInitialOverviewData());
-  const [historicalData, setHistoricalData] = useState([]);
+  const [historicalData, setHistoricalData] = useState<any[]>([]);
   const [companyDescription, setCompanyDescription] = useState(initialDescription);
+  const [analysisData, setAnalysisData] = useState<any>(null); // New state for Python Backend Data
 
   const fetchStockData = async () => {
     if (!ticker) {
@@ -40,42 +43,61 @@ export default function AnalysisPage() {
     setHistoricalData([]);
     setOverviewData(getInitialOverviewData());
     setCompanyDescription(initialDescription);
+    setAnalysisData(null); // Reset analysis data
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+        // 1. Fetch Dummy Data (Overview Tab)
+        // In a real app, this would also be an API call
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+        const stockData = dummyData[ticker.toUpperCase()];
 
-    const stockData = dummyData[ticker.toUpperCase()];
+        if (stockData) {
+            const { globalQuote, marketCap, peRatio, week52High, week52Low, description, timeSeries } = stockData;
+            const currentPrice = parseFloat(globalQuote["05. price"]);
+            const prevClose = parseFloat(globalQuote["08. previous close"]);
+            const priceChange = currentPrice - prevClose;
+            const priceChangePercent = ((priceChange / prevClose) * 100).toFixed(2);
 
-    if (stockData) {
-        const { globalQuote, marketCap, peRatio, week52High, week52Low, description, timeSeries } = stockData;
-        const currentPrice = parseFloat(globalQuote["05. price"]);
-        const prevClose = parseFloat(globalQuote["08. previous close"]);
-        const priceChange = currentPrice - prevClose;
-        const priceChangePercent = ((priceChange / prevClose) * 100).toFixed(2);
+            const newOverviewData = [
+                { title: "Current Price", value: `₹${currentPrice.toFixed(2)}`, icon: IndianRupeeIcon, change: `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}`, changeColor: priceChange >= 0 ? 'text-green-500' : 'text-red-500' },
+                { title: "Price Change (%)", value: `${priceChangePercent}%`, icon: priceChange >= 0 ? TrendingUp : TrendingDown, change: "", changeColor: priceChange >= 0 ? 'text-green-500' : 'text-red-500' },
+                { title: "Market Capitalization", value: `₹${marketCap}`, icon: Building },
+                { title: "P/E Ratio", value: peRatio, icon: TrendingUp },
+                { title: "52-Week High", value: `₹${week52High}`, icon: ArrowUp },
+                { title: "52-Week Low", value: `₹${week52Low}`, icon: ArrowDown },
+            ];
+            setOverviewData(newOverviewData);
+            setCompanyDescription(description);
 
-        const newOverviewData = [
-            { title: "Current Price", value: `₹${currentPrice.toFixed(2)}`, icon: IndianRupeeIcon, change: `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}`, changeColor: priceChange >= 0 ? 'text-green-500' : 'text-red-500' },
-            { title: "Price Change (%)", value: `${priceChangePercent}%`, icon: priceChange >= 0 ? TrendingUp : TrendingDown, change: "", changeColor: priceChange >= 0 ? 'text-green-500' : 'text-red-500' },
-            { title: "Market Capitalization", value: `₹${marketCap}`, icon: Building },
-            { title: "P/E Ratio", value: peRatio, icon: TrendingUp },
-            { title: "52-Week High", value: `₹${week52High}`, icon: ArrowUp },
-            { title: "52-Week Low", value: `₹${week52Low}`, icon: ArrowDown },
-        ];
-        setOverviewData(newOverviewData);
-        setCompanyDescription(description);
+            const formattedData = Object.keys(timeSeries).map(date => ({
+                date,
+                close: parseFloat(timeSeries[date]['4. close']),
+            })).reverse();
+            setHistoricalData(formattedData);
+        } else {
+            // Only show error if BOTH dummy data and API fail, but for now we warn about dummy data
+            console.warn(`No dummy data found for ${ticker}. Overview will be empty.`);
+        }
 
-        const formattedData = Object.keys(timeSeries).map(date => ({
-            date,
-            close: parseFloat(timeSeries[date]['4. close']),
-        })).reverse();
-        setHistoricalData(formattedData);
+        // 2. Fetch Real Analysis Data (Trend Tab - Python Backend)
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/technical/${ticker}`);
+            if (response.ok) {
+                const result = await response.json();
+                setAnalysisData(result);
+            } else {
+                console.error("Failed to fetch analysis data");
+            }
+        } catch (apiError) {
+            console.error("API Connection Error:", apiError);
+            // We don't block the whole UI if just the trend analysis fails
+        }
 
-    } else {
-        setError(`No dummy data found for this ticker. Try one of: ${Object.keys(dummyData).join(', ')}`)
-        setOverviewData(getInitialOverviewData());
-        setHistoricalData([]);
+    } catch (err) {
+        setError("An unexpected error occurred.");
+    } finally {
+        setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -153,6 +175,7 @@ export default function AnalysisPage() {
           </Card>
         </TabsContent>
 
+        {/* UPDATED TREND ANALYSIS TAB */}
         <TabsContent value="trend" className="mt-4">
             <Card>
                 <CardHeader>
@@ -167,7 +190,9 @@ export default function AnalysisPage() {
                                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">--</div>
+                                <div className="text-2xl font-bold">
+                                    {analysisData ? analysisData.trend : "--"}
+                                </div>
                             </CardContent>
                         </Card>
                         <Card>
@@ -176,7 +201,9 @@ export default function AnalysisPage() {
                                 <Gauge className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">--</div>
+                                <div className="text-2xl font-bold">
+                                    {analysisData ? `${(analysisData.confidence * 100).toFixed(1)}%` : "--"}
+                                </div>
                             </CardContent>
                         </Card>
                         <Card>
@@ -185,7 +212,12 @@ export default function AnalysisPage() {
                                 <Bell className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">--</div>
+                                <div className={`text-2xl font-bold ${
+                                    analysisData?.signal === "BUY" ? "text-green-600" : 
+                                    analysisData?.signal === "SELL" ? "text-red-600" : ""
+                                }`}>
+                                    {analysisData ? analysisData.signal : "--"}
+                                </div>
                             </CardContent>
                         </Card>
                     </div>
@@ -197,7 +229,9 @@ export default function AnalysisPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground">--</p>
+                            <p className="text-muted-foreground">
+                                {analysisData ? analysisData.ai_insight : "Enter a stock ticker above to generate AI insights."}
+                            </p>
                         </CardContent>
                     </Card>
                 </CardContent>
