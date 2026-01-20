@@ -6,6 +6,8 @@ import {
   Newspaper,
   FileText,
   Bell,
+  Rocket,
+  AreaChart
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -26,14 +28,16 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 const mainNavItems = [
   { href: "/dashboard/analysis", icon: LineChart, label: "Analysis" },
-  { href: "/dashboard/live-news", icon: Newspaper, label: "Live News" },
+  { href: "/dashboard/sentiment-analysis", icon: Newspaper, label: "Sentiment Analysis" },
   { href: "/dashboard/finbot", icon: Bot, label: "FinBot" },
-  { href: "/dashboard/analysis", icon: FileText, label: "Generate Reports" },
 ];
 
-const footerNavItems = [
-  { href: "/dashboard/analysis", icon: Bell, label: "Notifications" },
+const playGroundNavItems = [
+  { href: "/dashboard/analysis", icon: AreaChart, label: "Real-Time Simulator" },
+  { href: "/dashboard/get-started", icon: Rocket, label: "Get Started" },
 ];
+
+const footerNavItems = [];
 
 export function SidebarNav({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -58,7 +62,25 @@ export function SidebarNav({ children }: { children: React.ReactNode }) {
               <SidebarMenuItem key={item.href + item.label}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname.startsWith(item.href) && item.label !== 'Generate Reports'}
+                  isActive={pathname.startsWith(item.href) && item.label !== 'Generate Reports' && !playGroundNavItems.some(pi => pathname.startsWith(pi.href))}
+                  tooltip={item.label}
+                  className="justify-start"
+                >
+                  <Link href={item.href}>
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+            <h3 className="px-4 pt-2 pb-1 text-xs font-semibold text-muted-foreground/80 tracking-wider group-data-[collapsible=icon]:hidden">
+              PlayGround
+            </h3>
+            {playGroundNavItems.map((item) => (
+              <SidebarMenuItem key={item.href + item.label}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith(item.href)}
                   tooltip={item.label}
                   className="justify-start"
                 >
