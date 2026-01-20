@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, IndianRupeeIcon, Search, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Building, Percent, Loader2, Gauge, Bell, Sparkles, Info } from "lucide-react";
+import { IndianRupeeIcon, Search, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Building, Percent, Loader2, Gauge, Bell, Sparkles, Activity, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
 import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { dummyData } from "@/lib/dummy-data";
@@ -46,36 +46,53 @@ export default function AnalysisPage() {
     setAnalysisData(null);
 
     try {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const stockData = dummyData[ticker.toUpperCase()];
+        // --- 1. FETCH OVERVIEW DATA (Dynamic!) ---
+        try {
+            const overviewRes = await fetch(`http://127.0.0.1:8000/overview/${ticker}`);
+            const overviewJson = await overviewRes.json();
+            
+            if (!overviewJson.error) {
+                const { current_price, price_change, change_percent, market_cap, pe_ratio, high_52, low_52, description } = overviewJson;
+                
+                // Helper to format large numbers
+                const formatCap = (num: number) => {
+                    if (num >= 1.0e+12) return (num / 1.0e+12).toFixed(2) + "T";
+                    if (num >= 1.0e+9) return (num / 1.0e+9).toFixed(2) + "B";
+                    if (num >= 1.0e+7) return (num / 1.0e+7).toFixed(2) + "Cr"; 
+                    return num.toString();
+                };
 
-        if (stockData) {
-            const { globalQuote, marketCap, peRatio, week52High, week52Low, description, timeSeries } = stockData;
-            const currentPrice = parseFloat(globalQuote["05. price"]);
-            const prevClose = parseFloat(globalQuote["08. previous close"]);
-            const priceChange = currentPrice - prevClose;
-            const priceChangePercent = ((priceChange / prevClose) * 100).toFixed(2);
-
-            const newOverviewData = [
-                { title: "Current Price", value: `₹${currentPrice.toFixed(2)}`, icon: IndianRupeeIcon, change: `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}`, changeColor: priceChange >= 0 ? 'text-green-400' : 'text-red-400', description: "The most recent trading price of the stock." },
-                { title: "Price Change (%)", value: `${priceChangePercent}%`, icon: priceChange >= 0 ? TrendingUp : TrendingDown, changeColor: priceChange >= 0 ? 'text-green-400' : 'text-red-400', description: "The daily fluctuation in the stock's price." },
-                { title: "Market Capitalization", value: `₹${marketCap}`, icon: Building, description: "Total market value of the company's outstanding shares." },
-                { title: "P/E Ratio", value: peRatio, icon: TrendingUp, description: "Ratio of the company's stock price to its earnings per share." },
-                { title: "52-Week High", value: `₹${week52High}`, icon: ArrowUp, description: "The highest price at which the stock has traded in the past year." },
-                { title: "52-Week Low", value: `₹${week52Low}`, icon: ArrowDown, description: "The lowest price at which the stock has traded in the past year." },
-            ];
-            setOverviewData(newOverviewData);
-            setCompanyDescription(description);
-
-            const formattedData = Object.keys(timeSeries).map(date => ({
-                date,
-                close: parseFloat(timeSeries[date]['4. close']),
-            })).reverse();
-            setHistoricalData(formattedData);
-        } else {
-            console.warn(`No dummy data found for ${ticker}.`);
+                const newOverviewData = [
+                    { title: "Current Price", value: `₹${current_price}`, icon: IndianRupeeIcon, change: `${price_change >= 0 ? '+' : ''}${price_change}`, changeColor: price_change >= 0 ? 'text-green-400' : 'text-red-400', description: "The most recent trading price." },
+                    { title: "Price Change (%)", value: `${change_percent}%`, icon: price_change >= 0 ? TrendingUp : TrendingDown, changeColor: price_change >= 0 ? 'text-green-400' : 'text-red-400', description: "Daily price fluctuation." },
+                    { title: "Market Cap", value: `₹${formatCap(market_cap)}`, icon: Building, description: "Total market value." },
+                    { title: "P/E Ratio", value: pe_ratio, icon: TrendingUp, description: "Price-to-Earnings Ratio." },
+                    { title: "52-Week High", value: `₹${high_52}`, icon: ArrowUp, description: "Highest price in last year." },
+                    { title: "52-Week Low", value: `₹${low_52}`, icon: ArrowDown, description: "Lowest price in last year." },
+                ];
+                setOverviewData(newOverviewData);
+                const shortDesc = description.split('. ').slice(0, 2).join('. ') + '.';
+                setCompanyDescription(shortDesc);
+            }
+        } catch (e) {
+            console.error("Overview Fetch Failed", e);
         }
 
+        // --- 2. FETCH HISTORICAL CHART (Real!) ---
+        try {
+            const historyRes = await fetch(`http://127.0.0.1:8000/history/${ticker}`);
+            const historyJson = await historyRes.json();
+            
+            if (Array.isArray(historyJson)) {
+                setHistoricalData(historyJson);
+            } else {
+                console.warn("History data format invalid", historyJson);
+            }
+        } catch (e) {
+            console.error("Failed to fetch history:", e);
+        }
+
+        // --- 3. FETCH TECHNICAL ANALYSIS ---
         try {
             const response = await fetch(`http://127.0.0.1:8000/technical/${ticker}`);
             if (response.ok) {
@@ -157,16 +174,50 @@ export default function AnalysisPage() {
                   <CardTitle className="text-xl">Historical Price Trend</CardTitle>
                   <CardDescription className="pt-2">Closing price trend over the last 100 days.</CardDescription>
               </CardHeader>
+              
+              {/* --- UPDATED GRAPH SECTION START --- */}
               <CardContent className="h-[400px]">
                   {historicalData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={historicalData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-                              <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
-                              <YAxis domain={['dataMin - 20', 'dataMax + 20']} stroke="hsl(var(--muted-foreground))" />
-                              <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }} />
-                              <Legend />
-                              <Line type="monotone" dataKey="close" name="Close Price" stroke="hsl(var(--primary))" strokeWidth={2} activeDot={{ r: 8 }} />
+                          <LineChart data={historicalData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted)/0.5)" />
+                              <XAxis 
+                                  dataKey="date" 
+                                  stroke="hsl(var(--muted-foreground))" 
+                                  tickFormatter={(value) => {
+                                      const date = new Date(value);
+                                      return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
+                                  }}
+                                  minTickGap={30}
+                                  tick={{ fontSize: 12 }}
+                              />
+                              <YAxis 
+                                  domain={['auto', 'auto']} 
+                                  stroke="hsl(var(--muted-foreground))" 
+                                  tickFormatter={(value) => `₹${value.toFixed(0)}`}
+                                  tick={{ fontSize: 12 }}
+                              />
+                              <Tooltip 
+                                  contentStyle={{ 
+                                      backgroundColor: 'hsl(var(--background))', 
+                                      border: '1px solid hsl(var(--border))',
+                                      borderRadius: '8px',
+                                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                  }}
+                                  itemStyle={{ color: 'hsl(var(--primary))' }}
+                                  labelStyle={{ color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}
+                                  formatter={(value: number) => [`₹${value.toFixed(2)}`, "Close Price"]}
+                                  labelFormatter={(label) => new Date(label).toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                              />
+                              <Line 
+                                  type="monotone" 
+                                  dataKey="close" 
+                                  name="Close Price" 
+                                  stroke="hsl(var(--primary))" 
+                                  strokeWidth={2} 
+                                  dot={false} 
+                                  activeDot={{ r: 6, strokeWidth: 0 }} 
+                              />
                           </LineChart>
                       </ResponsiveContainer>
                   ) : (
@@ -175,6 +226,8 @@ export default function AnalysisPage() {
                       </div>
                   )}
               </CardContent>
+              {/* --- UPDATED GRAPH SECTION END --- */}
+
           </Card>
         </TabsContent>
 
@@ -188,21 +241,21 @@ export default function AnalysisPage() {
                     <div className="grid gap-6 sm:grid-cols-3">
                         <StatCard 
                             title="Trend Prediction" 
-                            value={analysisData ? analysisData.ui_summary.trend : "--"} 
-                            icon={analysisData?.ui_summary.trend === 'UP' ? TrendingUp : TrendingDown} 
+                            value={analysisData ? analysisData.trend : "--"} 
+                            icon={analysisData?.trend === 'UP' ? TrendingUp : TrendingDown} 
                             description="The predicted direction of the stock price movement."
                         />
                         <StatCard 
                             title="Confidence" 
-                            value={analysisData ? `${(analysisData.ui_summary.confidence * 100).toFixed(1)}%` : "--"} 
+                            value={analysisData ? `${(analysisData.confidence * 100).toFixed(1)}%` : "--"} 
                             icon={Gauge}
                             description="The model's confidence level in its trend prediction."
                         />
                         <StatCard 
                             title="Signal" 
-                            value={analysisData ? analysisData.ui_summary.signal : "--"} 
+                            value={analysisData ? analysisData.signal : "--"} 
                             icon={Bell} 
-                            changeColor={analysisData?.ui_summary.signal === "BUY" ? "text-green-400" : analysisData?.ui_summary.signal === "SELL" ? "text-red-400" : ""}
+                            changeColor={analysisData?.signal === "BUY" ? "text-green-400" : analysisData?.signal === "SELL" ? "text-red-400" : ""}
                             description="A trading signal (Buy, Sell, or Hold) based on the analysis."
                         />
                     </div>
@@ -214,7 +267,7 @@ export default function AnalysisPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground text-sm leading-relaxed">
+                            <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">
                                 {analysisData ? analysisData.ai_insight : "Enter a stock ticker above to generate AI insights."}
                             </p>
                         </CardContent>
@@ -224,7 +277,7 @@ export default function AnalysisPage() {
         </TabsContent>
 
         <TabsContent value="backtest" className="mt-6">
-            <BacktestSimulator />
+            <BacktestSimulator ticker={ticker || "INFY.NS"} />
         </TabsContent>
       </Tabs>
     </div>
