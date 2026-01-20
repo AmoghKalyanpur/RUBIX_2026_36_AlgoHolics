@@ -5,18 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, IndianRupeeIcon, Search, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Building, Percent, Loader2, Gauge, Bell, Sparkles } from "lucide-react";
+import { DollarSign, IndianRupeeIcon, Search, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Building, Percent, Loader2, Gauge, Bell, Sparkles, Info } from "lucide-react";
 import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { dummyData } from "@/lib/dummy-data";
 
 const getInitialOverviewData = () => ([
-    { title: "Current Price", value: "-", icon: IndianRupeeIcon, change: "", changeColor: "" },
-    { title: "Price Change (%)", value: "-", icon: Percent, change: "", changeColor: "" },
-    { title: "Market Capitalization", value: "-", icon: Building },
-    { title: "P/E Ratio", value: "-", icon: TrendingUp },
-    { title: "52-Week High", value: "-", icon: ArrowUp },
-    { title: "52-Week Low", value: "-", icon: ArrowDown },
+    { title: "Current Price", value: "-", icon: IndianRupeeIcon, description: "The most recent trading price of the stock." },
+    { title: "Price Change (%)", value: "-", icon: Percent, description: "The daily fluctuation in the stock's price." },
+    { title: "Market Capitalization", value: "-", icon: Building, description: "Total market value of the company's outstanding shares." },
+    { title: "P/E Ratio", value: "-", icon: TrendingUp, description: "Ratio of the company's stock price to its earnings per share." },
+    { title: "52-Week High", value: "-", icon: ArrowUp, description: "The highest price at which the stock has traded in the past year." },
+    { title: "52-Week Low", value: "-", icon: ArrowDown, description: "The lowest price at which the stock has traded in the past year." },
 ]);
 
 const initialDescription = "Select a stock ticker from the search bar to view its latest financial metrics and a brief company overview.";
@@ -26,11 +26,10 @@ export default function AnalysisPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Data States
   const [overviewData, setOverviewData] = useState(getInitialOverviewData());
   const [historicalData, setHistoricalData] = useState<any[]>([]);
   const [companyDescription, setCompanyDescription] = useState(initialDescription);
-  const [analysisData, setAnalysisData] = useState<any>(null); // New state for Python Backend Data
+  const [analysisData, setAnalysisData] = useState<any>(null);
 
   const fetchStockData = async () => {
     if (!ticker) {
@@ -43,12 +42,10 @@ export default function AnalysisPage() {
     setHistoricalData([]);
     setOverviewData(getInitialOverviewData());
     setCompanyDescription(initialDescription);
-    setAnalysisData(null); // Reset analysis data
+    setAnalysisData(null);
 
     try {
-        // 1. Fetch Dummy Data (Overview Tab)
-        // In a real app, this would also be an API call
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 500));
         const stockData = dummyData[ticker.toUpperCase()];
 
         if (stockData) {
@@ -59,12 +56,12 @@ export default function AnalysisPage() {
             const priceChangePercent = ((priceChange / prevClose) * 100).toFixed(2);
 
             const newOverviewData = [
-                { title: "Current Price", value: `₹${currentPrice.toFixed(2)}`, icon: IndianRupeeIcon, change: `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}`, changeColor: priceChange >= 0 ? 'text-green-500' : 'text-red-500' },
-                { title: "Price Change (%)", value: `${priceChangePercent}%`, icon: priceChange >= 0 ? TrendingUp : TrendingDown, change: "", changeColor: priceChange >= 0 ? 'text-green-500' : 'text-red-500' },
-                { title: "Market Capitalization", value: `₹${marketCap}`, icon: Building },
-                { title: "P/E Ratio", value: peRatio, icon: TrendingUp },
-                { title: "52-Week High", value: `₹${week52High}`, icon: ArrowUp },
-                { title: "52-Week Low", value: `₹${week52Low}`, icon: ArrowDown },
+                { title: "Current Price", value: `₹${currentPrice.toFixed(2)}`, icon: IndianRupeeIcon, change: `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}`, changeColor: priceChange >= 0 ? 'text-green-400' : 'text-red-400', description: "The most recent trading price of the stock." },
+                { title: "Price Change (%)", value: `${priceChangePercent}%`, icon: priceChange >= 0 ? TrendingUp : TrendingDown, changeColor: priceChange >= 0 ? 'text-green-400' : 'text-red-400', description: "The daily fluctuation in the stock's price." },
+                { title: "Market Capitalization", value: `₹${marketCap}`, icon: Building, description: "Total market value of the company's outstanding shares." },
+                { title: "P/E Ratio", value: peRatio, icon: TrendingUp, description: "Ratio of the company's stock price to its earnings per share." },
+                { title: "52-Week High", value: `₹${week52High}`, icon: ArrowUp, description: "The highest price at which the stock has traded in the past year." },
+                { title: "52-Week Low", value: `₹${week52Low}`, icon: ArrowDown, description: "The lowest price at which the stock has traded in the past year." },
             ];
             setOverviewData(newOverviewData);
             setCompanyDescription(description);
@@ -75,11 +72,9 @@ export default function AnalysisPage() {
             })).reverse();
             setHistoricalData(formattedData);
         } else {
-            // Only show error if BOTH dummy data and API fail, but for now we warn about dummy data
-            console.warn(`No dummy data found for ${ticker}. Overview will be empty.`);
+            console.warn(`No dummy data found for ${ticker}.`);
         }
 
-        // 2. Fetch Real Analysis Data (Trend Tab - Python Backend)
         try {
             const response = await fetch(`http://127.0.0.1:8000/technical/${ticker}`);
             if (response.ok) {
@@ -90,7 +85,6 @@ export default function AnalysisPage() {
             }
         } catch (apiError) {
             console.error("API Connection Error:", apiError);
-            // We don't block the whole UI if just the trend analysis fails
         }
 
     } catch (err) {
@@ -101,46 +95,47 @@ export default function AnalysisPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-6 bg-background">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h2 className="text-2xl font-bold tracking-tight">Stock Analysis</h2>
-            <div className="flex w-full max-w-sm items-center space-x-2">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Stock Analysis Dashboard</h1>
+            <div className="flex w-full max-w-md items-center space-x-2">
                 <Input
                     type="text"
                     placeholder="e.g., INFY.NS, RELIANCE.NS..."
+                    className="flex-1 bg-card border-border focus:ring-2 focus:ring-primary/50 transition-all"
                     value={ticker}
                     onChange={(e) => setTicker(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && !loading && fetchStockData()}
                     disabled={loading}
                 />
-                <Button type="submit" onClick={fetchStockData} disabled={loading}>
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                    <span className="ml-2">Analyse</span>
+                <Button type="submit" onClick={fetchStockData} disabled={loading} className="transition-all duration-300 ease-in-out hover:bg-primary/90">
+                    {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
+                    <span className="ml-2 hidden sm:inline">Analyse</span>
                 </Button>
             </div>
         </div>
 
         {error && (
-            <Card className="border-destructive bg-destructive/10">
+            <Card className="border-destructive bg-destructive/10 animate-in fade-in-50">
                 <CardHeader><CardTitle className="text-destructive">Error</CardTitle></CardHeader>
                 <CardContent><p>{error}</p></CardContent>
             </Card>
         )}
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-3 bg-card rounded-lg">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="trend">Trend Analysis</TabsTrigger>
+          <TabsTrigger value="trend">AI Trend Analysis</TabsTrigger>
           <TabsTrigger value="backtest">Backtest Simulator</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="mt-4">
-          <Card>
+        <TabsContent value="overview" className="mt-6 space-y-6">
+          <Card className="bg-card/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Key Metrics</CardTitle>
-              <CardDescription>{companyDescription}</CardDescription>
+              <CardTitle className="text-xl">Company Overview</CardTitle>
+              <CardDescription className="pt-2 text-foreground/80">{companyDescription}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 {overviewData.map((item) => (
                   <StatCard key={item.title} {...item} />
@@ -149,25 +144,25 @@ export default function AnalysisPage() {
             </CardContent>
           </Card>
 
-          <Card className="mt-6">
+          <Card className="bg-card/80 backdrop-blur-sm">
               <CardHeader>
-                  <CardTitle>Historical Price Trend</CardTitle>
-                  <CardDescription>Closing price trend over the last 100 days.</CardDescription>
+                  <CardTitle className="text-xl">Historical Price Trend</CardTitle>
+                  <CardDescription className="pt-2">Closing price trend over the last 100 days.</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="h-[400px]">
                   {historicalData.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={400}>
-                          <LineChart data={historicalData}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="date" />
-                              <YAxis domain={['dataMin - 20', 'dataMax + 20']} />
-                              <Tooltip />
+                      <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={historicalData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                              <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
+                              <YAxis domain={['dataMin - 20', 'dataMax + 20']} stroke="hsl(var(--muted-foreground))" />
+                              <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }} />
                               <Legend />
-                              <Line type="monotone" dataKey="close" name="Close Price" stroke="#8884d8" activeDot={{ r: 8 }} />
+                              <Line type="monotone" dataKey="close" name="Close Price" stroke="hsl(var(--primary))" strokeWidth={2} activeDot={{ r: 8 }} />
                           </LineChart>
                       </ResponsiveContainer>
                   ) : (
-                      <div className="flex items-center justify-center h-96">
+                      <div className="flex items-center justify-center h-full text-muted-foreground">
                           <p>Search for a stock to see its historical price trend.</p>
                       </div>
                   )}
@@ -175,53 +170,35 @@ export default function AnalysisPage() {
           </Card>
         </TabsContent>
 
-        {/* UPDATED TREND ANALYSIS TAB */}
-        <TabsContent value="trend" className="mt-4">
-            <Card>
+        <TabsContent value="trend" className="mt-6">
+            <Card className="bg-card/80 backdrop-blur-sm">
                 <CardHeader>
-                    <CardTitle>AI-Powered Trend Analysis</CardTitle>
-                    <CardDescription>Real-time technical analysis powered by a machine learning backend.</CardDescription>
+                    <CardTitle className="text-xl">AI-Powered Trend Analysis</CardTitle>
+                    <CardDescription className="pt-2">Real-time technical analysis powered by a machine learning backend.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 py-6">
                     <div className="grid gap-6 sm:grid-cols-3">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Trend Prediction</CardTitle>
-                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">
-                                    {analysisData ? analysisData.trend : "--"}
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Confidence</CardTitle>
-                                <Gauge className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">
-                                    {analysisData ? `${(analysisData.confidence * 100).toFixed(1)}%` : "--"}
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Signal</CardTitle>
-                                <Bell className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className={`text-2xl font-bold ${
-                                    analysisData?.signal === "BUY" ? "text-green-600" : 
-                                    analysisData?.signal === "SELL" ? "text-red-600" : ""
-                                }`}>
-                                    {analysisData ? analysisData.signal : "--"}
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <StatCard 
+                            title="Trend Prediction" 
+                            value={analysisData ? analysisData.ui_summary.trend : "--"} 
+                            icon={analysisData?.ui_summary.trend === 'UP' ? TrendingUp : TrendingDown} 
+                            description="The predicted direction of the stock price movement."
+                        />
+                        <StatCard 
+                            title="Confidence" 
+                            value={analysisData ? `${(analysisData.ui_summary.confidence * 100).toFixed(1)}%` : "--"} 
+                            icon={Gauge}
+                            description="The model's confidence level in its trend prediction."
+                        />
+                        <StatCard 
+                            title="Signal" 
+                            value={analysisData ? analysisData.ui_summary.signal : "--"} 
+                            icon={Bell} 
+                            changeColor={analysisData?.ui_summary.signal === "BUY" ? "text-green-400" : analysisData?.ui_summary.signal === "SELL" ? "text-red-400" : ""}
+                            description="A trading signal (Buy, Sell, or Hold) based on the analysis."
+                        />
                     </div>
-                    <Card>
+                    <Card className="border-border/50">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-lg font-semibold">
                                 <Sparkles className="h-5 w-5 text-primary" />
@@ -229,7 +206,7 @@ export default function AnalysisPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground">
+                            <p className="text-muted-foreground text-sm leading-relaxed">
                                 {analysisData ? analysisData.ai_insight : "Enter a stock ticker above to generate AI insights."}
                             </p>
                         </CardContent>
@@ -238,13 +215,13 @@ export default function AnalysisPage() {
             </Card>
         </TabsContent>
 
-        <TabsContent value="backtest" className="mt-4">
-            <Card>
+        <TabsContent value="backtest" className="mt-6">
+            <Card className="bg-card/80 backdrop-blur-sm">
                 <CardHeader>
-                    <CardTitle>Backtest Simulator</CardTitle>
-                    <CardDescription>Simulate trading strategies based on historical data.</CardDescription>
+                    <CardTitle className="text-xl">Backtest Simulator</CardTitle>
+                    <CardDescription className="pt-2">Simulate trading strategies based on historical data.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex items-center justify-center h-96">
+                <CardContent className="flex items-center justify-center h-96 text-muted-foreground">
                     <p>Backtesting feature coming soon.</p>
                 </CardContent>
             </Card>
