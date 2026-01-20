@@ -41,13 +41,13 @@ export function SidebarNav({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <Sidebar side="left" variant="sidebar" collapsible="icon">
-        <SidebarHeader className="h-14 items-center justify-center p-2 text-primary-foreground group-data-[collapsible=icon]:h-10">
+        <SidebarHeader className="h-14 items-center justify-center p-2 group-data-[collapsible=icon]:h-10">
           <Link
             href="/"
             className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center"
           >
-            <LineChart className="size-6 shrink-0" />
-            <span className="font-bold text-lg group-data-[collapsible=icon]:hidden">
+            <LineChart className="size-6 shrink-0 text-sidebar-primary" />
+            <span className="font-bold text-lg group-data-[collapsible=icon]:hidden text-sidebar-foreground">
               <span className="text-sidebar-ring">F</span>in<span className="text-sidebar-ring">S</span>ight
             </span>
           </Link>
