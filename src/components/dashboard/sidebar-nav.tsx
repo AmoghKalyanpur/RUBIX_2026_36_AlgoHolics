@@ -6,7 +6,6 @@ import {
   Newspaper,
   FileText,
   Bell,
-  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,6 +22,7 @@ import {
   SidebarTrigger,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const mainNavItems = [
   { href: "/dashboard/analysis", icon: LineChart, label: "Analysis" },
@@ -33,7 +33,6 @@ const mainNavItems = [
 
 const footerNavItems = [
   { href: "/dashboard/analysis", icon: Bell, label: "Notifications" },
-  { href: "/dashboard/analysis", icon: Settings, label: "Settings" },
 ];
 
 export function SidebarNav({ children }: { children: React.ReactNode }) {
@@ -88,6 +87,11 @@ export function SidebarNav({ children }: { children: React.ReactNode }) {
                   </SidebarMenuButton>
               </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <div className="flex justify-start w-full">
+                  <ThemeToggle />
+                </div>
+              </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>

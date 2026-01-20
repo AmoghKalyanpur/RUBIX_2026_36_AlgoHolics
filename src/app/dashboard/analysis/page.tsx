@@ -97,22 +97,29 @@ export default function AnalysisPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6 bg-background">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Stock Analysis Dashboard</h1>
-            <div className="flex w-full max-w-md items-center space-x-2">
-                <Input
-                    type="text"
-                    placeholder="e.g., INFY.NS, RELIANCE.NS..."
-                    className="flex-1 bg-card border-border focus:ring-2 focus:ring-primary/50 transition-all"
-                    value={ticker}
-                    onChange={(e) => setTicker(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && !loading && fetchStockData()}
-                    disabled={loading}
-                />
-                <Button type="submit" onClick={fetchStockData} disabled={loading} className="transition-all duration-300 ease-in-out hover:bg-primary/90">
-                    {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
-                    <span className="ml-2 hidden sm:inline">Analyse</span>
-                </Button>
+        <div className="text-center py-8 md:py-12 px-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/20 shadow-sm">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                Stock Analysis Dashboard
+            </h1>
+            <p className="mt-3 md:mt-4 max-w-2xl mx-auto text-base text-muted-foreground">
+                Leverage AI-powered technical analysis and backtesting to make smarter investment decisions. Enter a stock ticker below to begin.
+            </p>
+            <div className="mt-6 flex justify-center">
+                <div className="flex w-full max-w-md items-center space-x-2">
+                    <Input
+                        type="text"
+                        placeholder="e.g., INFY.NS, RELIANCE.NS..."
+                        className="flex-1 bg-background/50 border-border focus:ring-2 focus:ring-primary/50 transition-all"
+                        value={ticker}
+                        onChange={(e) => setTicker(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && !loading && fetchStockData()}
+                        disabled={loading}
+                    />
+                    <Button type="submit" onClick={fetchStockData} disabled={loading} className="transition-all duration-300 ease-in-out hover:bg-primary/90">
+                        {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
+                        <span className="ml-2">Analyse</span>
+                    </Button>
+                </div>
             </div>
         </div>
 
