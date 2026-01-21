@@ -143,3 +143,57 @@ def get_stock_history(ticker: str, period: str = "1y"):
         
     except Exception as e:
         return {"error": str(e)}
+import google.generativeai as genai
+import json
+import os
+
+# Ensure your API Key is loaded
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+# ==========================================
+#  ENDPOINT 5: AI-SIMULATED LIVE TICKER
+# ==========================================
+@app.get("/news/ticker")
+def live_market_ticker():
+    """
+    Uses Gemini to generate realistic 'Live' Indian market headlines.
+    """
+    try:
+        # We use Gemini Flash for speed
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        
+        prompt = """
+        Generate 8 short, realistic "breaking news" headlines for the Indian Stock Market (Nifty 50, Sensex, Bank Nifty, and top stocks like Reliance/TCS).
+        
+        Requirements:
+        1. Mix of Positive (Bullish), Negative (Bearish), and Neutral news.
+        2. Keep headlines under 10 words.
+        3. Output strictly valid JSON format.
+        
+        Output Structure:
+        [
+            {"title": "Nifty reclaims 22,000 mark amid heavy buying", "sentiment": "positive"},
+            {"title": "TCS shares dip 2% after quarterly results miss", "sentiment": "negative"}
+        ]
+        
+        Return ONLY the JSON array. No markdown formatting.
+        """
+        
+        response = model.generate_content(prompt)
+        
+        # Clean the response text (remove markdown backticks if Gemini adds them)
+        cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
+        
+        data = json.loads(cleaned_text)
+        return data
+
+    except Exception as e:
+        print(f"AI Error: {e}")
+        # Reliable Fallback if AI fails
+        return [
+            {"title": "Sensex rallies 500 points on global cues", "sentiment": "positive"},
+            {"title": "Banking stocks under pressure ahead of RBI policy", "sentiment": "negative"},
+            {"title": "Rupee opens flat against US Dollar", "sentiment": "neutral"},
+            {"title": "Reliance Industries hits fresh 52-week high", "sentiment": "positive"},
+            {"title": "FIIs sell equities worth ₹2,000 Cr on Monday", "sentiment": "negative"}
+        ]
