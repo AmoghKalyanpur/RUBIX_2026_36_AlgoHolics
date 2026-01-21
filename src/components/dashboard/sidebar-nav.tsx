@@ -33,7 +33,7 @@ const mainNavItems = [
 ];
 
 const playGroundNavItems = [
-  { href: "/dashboard/analysis", icon: AreaChart, label: "Real-Time Simulator" },
+  { href: "/dashboard/simulator", icon: AreaChart, label: "Real-Time Simulator" },
   { href: "/dashboard/get-started", icon: Rocket, label: "Get Started" },
 ];
 
